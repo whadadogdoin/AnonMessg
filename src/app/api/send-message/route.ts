@@ -30,9 +30,9 @@ export async function POST(request: Request) {
         const message = {
             content,
             createdAt: new Date()
-        } as messageInterface
+        }
 
-        user.messages?.push(message)
+        user.messages?.push(message as messageInterface)
 
         await user.save()
 
