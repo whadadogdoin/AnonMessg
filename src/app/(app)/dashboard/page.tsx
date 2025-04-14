@@ -23,24 +23,45 @@ function UserDashboard() {
 
   const { toast } = useToast();
 
-  const handleDeleteMessage = (messageId: string) => {
-    setMessages(messages.filter((message) => message._id !== messageId));
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      const result = await axios.delete(`/api/delete-message/${messageId}`)
+      setMessages((prevMessages) =>
+        prevMessages.filter((message) => message._id !== messageId)
+      );
+      toast({
+        title: 'Deleted Message',
+        description: 'Message successfully deleted'
+      })
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse>
+      toast({
+        title: 'Error deleting message',
+        description: axiosError.response?.data.message ?? 'Failed to delete message',
+        variant: 'destructive'
+      })
+    }
   };
 
   const { data: session } = useSession();
 
   const form = useForm({
     resolver: zodResolver(acceptMessageValidation),
+    defaultValues: {
+      acceptMessages: false,
+    },
   });
 
-  const { register, watch, setValue } = form;
+  const { register, watch, setValue, reset } = form;
   const acceptMessages = watch('acceptMessages');
 
   const fetchAcceptMessages = useCallback(async () => {
     setIsSwitchLoading(true);
     try {
       const response = await axios.get<ApiResponse>('/api/get-status');
-      setValue('acceptMessages', response.data.isAcceptingMessages);
+      console.log('Fetched acceptMessages:', response.data.isAcceptingMessages);
+      reset({'acceptMessages': response.data.isAcceptingMessages});
+      console.log('Fetched setting:', response.data.isAcceptingMessages);
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
       toast({
@@ -99,7 +120,7 @@ function UserDashboard() {
       const response = await axios.post<ApiResponse>('/api/update-status', {
         acceptMessages: !acceptMessages,
       });
-      setValue('acceptMessages', !acceptMessages);
+      await fetchAcceptMessages()
       toast({
         title: response.data.message,
         variant: 'default',
@@ -152,7 +173,6 @@ function UserDashboard() {
 
       <div className="mb-4">
         <Switch
-          {...register('acceptMessages')}
           checked={acceptMessages}
           onCheckedChange={handleSwitchChange}
           disabled={isSwitchLoading}

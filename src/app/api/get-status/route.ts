@@ -33,7 +33,7 @@ export async function GET(){
         return Response.json({
             success: true,
             message: "User status fetched successfully",
-            data: newUser.isAcceptingMessage
+            isAcceptingMessages: newUser.isAcceptingMessage
         },{
             status: 200
         })
