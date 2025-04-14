@@ -21,7 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
 
-function page() {
+export default function SignUpPage() {
   
   const [username, setUsername] = useState("")
   const [checkLoader, setCheckLoader] = useState(false)
@@ -178,4 +178,3 @@ function page() {
     </div>
   )
 }
-export default page
