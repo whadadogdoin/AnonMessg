@@ -16,16 +16,7 @@ export async function GET(req: Request) {
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 200
     });
-
-    if (completion.error?.code === 402) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          message: 'Ran out of OpenRouter credits. Try again later or upgrade.',
-        }),
-        { status: 402 }
-      );
-    }
+    console.log("completion",completion);
     
     const message = completion.choices[0].message.content;
 
