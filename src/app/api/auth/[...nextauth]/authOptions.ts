@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs"
 import dbConnect from "@/lib/dbConnect"
 
 export const authOptions: NextAuthOptions = {
+    secret: process.env.NEXTAUTH_SECRET,
     providers: [
         CredentialsProvider({
 
@@ -15,22 +16,28 @@ export const authOptions: NextAuthOptions = {
             credentials: {
                 identifier: {label: "Username or Email", type: "text", placeholder: "username or email"},
                 password: {label: "Password", type: "Password"}
-            },
+            },            
+            
             async authorize(credentials: any) : Promise<any> {
                 await dbConnect();
                 try {
+                    console.log("AUTH: Received credentials", credentials);
+                    const {identifier, password} = credentials
+                    console.log(identifier, password)
+                    
                     const user = await User.findOne(
                         {
-                            $or: [{username: credentials?.identifier, email: credentials?.identifier}]
+                            $or: [{username: identifier},{ email: identifier}]
                         }
                     )
+                    console.log(user);
                     if(!user){
                         throw new Error("Invalid Credentials")
                     }
                     if(!user.isVerified){
                         throw new Error("Please verify your account before signing in")
                     }
-                    const verifiyPassword = await bcrypt.compare(credentials?.password,user.password)
+                    const verifiyPassword = await bcrypt.compare(password,user.password)
                     if(!verifiyPassword){
                         throw new Error("Incorrect Password")
                     }
@@ -65,6 +72,6 @@ export const authOptions: NextAuthOptions = {
         strategy: "jwt",
     },
     pages: {
-        signIn: '/signin'
+        signIn: '/sign-in'
     }
 }

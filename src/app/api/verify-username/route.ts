@@ -11,6 +11,7 @@ export async function POST(request: Request){
     await dbConnect();
     try {
         const {username} = await request.json()
+        
         const queryParams = {
             username
         }
@@ -24,6 +25,7 @@ export async function POST(request: Request){
                 status: 400
             })
         }
+        console.log(username);
         const user = await User.findOne({
             username,
             isVerified: true

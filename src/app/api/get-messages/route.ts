@@ -1,14 +1,17 @@
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/user.model";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth].ts/authOptions";
+import { authOptions } from "../auth/[...nextauth]/authOptions";
 import mongoose from "mongoose";
+import { log } from "console";
 
 export async function GET() {
     await dbConnect();
 
     const session = await getServerSession(authOptions)
     const user = session?.user
+
+    console.log("Session user ID:", user._id);
 
     if(!session || !user){
         return Response.json({
@@ -20,6 +23,8 @@ export async function GET() {
     }
 
     const userId = new mongoose.Types.ObjectId(user._id)
+    const plainUser = await User.findOne({ _id: userId });
+    console.log("Plain user from DB:", plainUser);
 
     try {
         const dbUser = await User.aggregate([
@@ -29,7 +34,10 @@ export async function GET() {
                 }
             },
             {
-                $unwind: "$messages"
+                $unwind: {
+                    path: "$messages",
+                    preserveNullAndEmptyArrays: true
+                }
             },
             {
                 $sort: {

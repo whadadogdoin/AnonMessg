@@ -1,13 +1,16 @@
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/user.model";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth].ts/authOptions";
+import { authOptions } from "../auth/[...nextauth]/authOptions";
 
 export async function POST(request: Request) {
     await dbConnect();
 
     const session = await getServerSession(authOptions)
     const user = session?.user
+
+    console.log(request);
+    
 
     if(!session || !user){
         return Response.json({
@@ -18,12 +21,16 @@ export async function POST(request: Request) {
         })
     }
 
-    const userId = user._id
-    const {acceptingMessages} = await request.json()
+    const userId = user?._id
+    const body = await request.json()
+    const {acceptMessages} = body
+
+    console.log(acceptMessages);
+    
 
     try {
-        const newUser = User.findByIdAndUpdate(userId,{
-            isAcceptingMessage: acceptingMessages
+        const newUser = await User.findByIdAndUpdate(userId,{
+            isAcceptingMessage: acceptMessages
         },{
             new: true
         })

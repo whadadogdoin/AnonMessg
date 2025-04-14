@@ -7,8 +7,7 @@ import bcrypt from 'bcryptjs'
 export async function POST(request: Request) {
     await dbConnect();
     try {
-        const {username,email,password} = await request.json()
-
+        const {username,email,password} = await request.json()        
         const existingUserByUsername = await User.findOne({
             username,
             isVerified: true
@@ -37,9 +36,11 @@ export async function POST(request: Request) {
                 })
             } else{
                 const salt = await bcrypt.genSalt(10)
+                existingUserByEmail.username=username
                 existingUserByEmail.password = await bcrypt.hash(password,salt)
                 existingUserByEmail.verificationToken = verifyCode
                 existingUserByEmail.verificationTokenExpiry = new Date(Date.now() + 3600000)
+                console.log(existingUserByEmail);
                 await existingUserByEmail.save();
             }
         } else{
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
                 isAcceptingMessage: false,
                 messages: []
             })
-
+            console.log(username);
             await newUser.save()
         }
 

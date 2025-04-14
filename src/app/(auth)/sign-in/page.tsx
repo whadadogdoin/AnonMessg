@@ -31,30 +31,41 @@ export default function SignInForm() {
 
   const { toast } = useToast();
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
-    const result = await signIn('credentials', {
-      redirect: false,
-      identifier: data.identifier,
-      password: data.password,
-    });
-
-    if (result?.error) {
-      if (result.error === 'CredentialsSignin') {
-        toast({
-          title: 'Login Failed',
-          description: 'Incorrect username or password',
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: 'Error',
-          description: result.error,
-          variant: 'destructive',
-        });
+    try {
+      const result = await signIn('credentials', {
+        redirect: false,
+        identifier: data.identifier,
+        password: data.password,
+        callbackUrl: `http://localhost:3000/dashboard`,
+      });
+      console.log(result);
+      
+      if (result?.error) {
+        if (result.error === 'CredentialsSignin') {
+          toast({
+            title: 'Login Failed',
+            description: 'Incorrect username or password',
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Error',
+            description: result.error,
+            variant: 'destructive',
+          });
+        }
       }
-    }
-
-    if (result?.url) {
-      router.replace('/dashboard');
+      console.log("Result URL:", result?.url);
+      if (result?.url) {
+        router.replace('/dashboard');
+      }
+    } catch (err) {
+      console.error("❌ signIn threw an error:", err);
+      toast({
+        title: "Unexpected error",
+        description: String(err),
+        variant: "destructive",
+      });
     }
   };
 

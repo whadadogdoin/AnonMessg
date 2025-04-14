@@ -1,7 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/user.model";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth].ts/authOptions";
+import { authOptions } from "../auth/[...nextauth]/authOptions";
 
 export async function GET(){
     await dbConnect()

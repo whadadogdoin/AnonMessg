@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { useDebounceCallback } from 'usehooks-ts'
+import { useDebounce } from 'use-debounce'
 import { useToast } from '@/components/ui/use-toast'
 import axios, { AxiosError } from "axios"
 import { ApiResponse } from '@/types/ApiResponse'
@@ -30,7 +30,7 @@ function page() {
   const { toast } = useToast()
   const router = useRouter()
 
-  const debounced = useDebounceCallback(setUsername, 300)
+  const [debounced] = useDebounce(username, 300)
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -41,12 +41,13 @@ function page() {
     }
   })
 
-  useEffect(() => {
+  useEffect(() => { 
+    if (!debounced || debounced.trim().length === 0) return;
     const validateUsername = async () => {
       setCheckLoader(true)
       setMessage("")
       try {
-        const response = await axios.post("/api/verify-username", debounced)
+        const response = await axios.post("/api/verify-username", {username: debounced})
         setMessage(response.data.message)
       } catch (error) {
         const axiosError = error as AxiosError<ApiResponse>;
@@ -61,13 +62,14 @@ function page() {
   const onSubmit = async (data: z.infer<typeof signupSchema>) => {
     setSubmitLoader(true)
     try {
-      const response: ApiResponse = await axios.post("/api/signup",data)
-      if(response.success){
+      const response = await axios.post("/api/signup",data)
+      if(response.data.success){
+        console.log("Yes")
         toast({
           title: "Signup Successfull",
           description: "Please verify yourself with the code sent to your mail"
         })
-        router.push(`/user-verification/${data.username}`)
+        router.push(`/verify/${data.username}`)
       }
     } catch (error) {
       console.error('Error during sign-up:', error);
