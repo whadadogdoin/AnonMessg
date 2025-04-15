@@ -36,9 +36,8 @@ export default function SignInForm() {
         redirect: false,
         identifier: data.identifier,
         password: data.password,
-        callbackUrl: `http://localhost:3000/dashboard`,
+        callbackUrl: `${process.env.NEXT_PUBLIC_NEXTAUTH_URL}/dashboard`,
       });
-      console.log(result);
       
       if (result?.error) {
         if (result.error === 'CredentialsSignin') {

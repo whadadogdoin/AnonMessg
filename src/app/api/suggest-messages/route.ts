@@ -1,10 +1,9 @@
 import OpenAI from 'openai';
 
-console.log('OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY);
 
 const openai = new OpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENROUTER_API_KEY!, // Make sure the key is passed correctl
+  apiKey: process.env.OPENROUTER_API_KEY!, 
 });
 
 export async function GET(req: Request) {
